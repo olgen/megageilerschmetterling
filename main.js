@@ -12,7 +12,7 @@ export var now;
 
 // Shake to switch modes
 export var accelerometer; // Enable the accelerometer
-export var mode = 2;
+export var mode = 0;
 export var analogInputs;
 
 var debounce = 0;
@@ -41,14 +41,15 @@ export var v = 1;
 var va;
 
 var lastBlink = 0;
-export var debug = 0;
 
 modes = [
-  effectSpin,
+  effectSpin, // using brightness
+
   (index) => {
     // h = 0.5;
     v = brightness;
   },
+
   (index) => {
     if (buttonValue == 0.0) {
       lastBlink = now;
@@ -59,7 +60,6 @@ modes = [
 
     if (lastBlink != 0) {
       delta = min(now - lastBlink, 500) / 500.0;
-      debug = delta;
       if (delta == 1) {
         lastBlink = 0;
       }
@@ -93,28 +93,16 @@ function checkModeSwitch(delta) {
 
   // Cycle mode if sensor board is shaken, no more than 1x / sec
   if (debounce > 1000 && horizontalAcceleration >= accelerationToModeSwitch) {
-    //mode = (mode + 1) % 3;
+    mode = (mode + 1) % modes.length;
     debounce = 0;
   }
 }
 
-export function gaugeVerticalAccel() {
-  return normalizedVA;
-}
-
 function updateAccelerometer(delta) {
-  // ground: -0.02
-  // range: -0.005 - -0.035
+  // g=: -0.02
+  // range while swinging: -0.005 - -0.035
   newValue = accelerometer[1];
   va = 0.95 * va + 0.05 * newValue;
-
-  // accelHistory[currentIdx] = va;
-  // currentIdx += 1;
-  // if (currentIdx == accelHistory.length) {
-  //   currentIdx = 0;
-  // }
-  // averageVA = arraySum(accelHistory) / arrayLength(accelHistory);
-  // normalizedVA = +0.5 + averageVA * 10; // use 0 as middle for the slider
 }
 
 function mapVAToZeroToOne(t) {
@@ -184,7 +172,6 @@ function renderAntenna(index) {
 
   if (lastBlink != 0) {
     delta = min(now - lastBlink, 500) / 500.0;
-    debug = delta / 4;
     if (delta == 1) {
       lastBlink = 0;
     }
