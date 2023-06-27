@@ -152,9 +152,9 @@ function updateButton() {
 
 function renderWing(index) {
   modes[mode](index);
-  if (index < 50 + 5000 * (va + 0.02)) {
+  if (index < 30 + 5000 * (va + 0.02)) {
     v = brightness;
-  } else if (index > lastWingsPixel - 48 - 5000 * (va + 0.02)) {
+  } else if (index > lastWingsPixel - 30 - 5000 * (va + 0.02)) {
     v = brightness;
   } else {
     v = 0;
