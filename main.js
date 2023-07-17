@@ -1,6 +1,4 @@
-// potentiometer averaged
-export var pot;
-pinMode(analogInputs[4], INPUT_PULLDOWN);
+//pinMode(analogInputs[4], INPUT_PULLDOWN)
 
 // extra button
 var BUTTON_PIN = 33;
@@ -14,9 +12,10 @@ export var now;
 export var accelerometer; // Enable the accelerometer
 export var mode = 0;
 export var analogInputs;
+// potentiometer averaged
+export var pot;
 
 var debounce = 0;
-var accelerationToModeSwitch = 0.03;
 
 // PIXELS:
 var firstWingsPixel = 0;
@@ -26,12 +25,6 @@ var lastEyesPixel = 233;
 var firstAntennaPixel = 234;
 var lastAntennaPixel = 235;
 
-historyLength = 50;
-var accelHistory = array(historyLength);
-var currentIdx = 0;
-export var averageVA = 0;
-export var normalizedVA;
-var s = 0;
 export var brightness = 1;
 
 export var h = 1;
@@ -40,33 +33,33 @@ export var v = 1;
 
 var va;
 
-var lastBlink = 0;
+export var lastBlink = 0;
 
 modes = [
   effectSpin, // using brightness
 
   (index) => {
-    // h = 0.5;
+    h = 0.5;
     v = brightness;
   },
 
   (index) => {
-    if (buttonValue == 0.0) {
-      lastBlink = now;
-    }
+    // if(buttonValue == 0.0) {
+    //   lastBlink = now;
+    // }
     // h = 0.7;
     v = brightness;
     s = 1;
 
-    if (lastBlink != 0) {
-      delta = min(now - lastBlink, 500) / 500.0;
-      if (delta == 1) {
-        lastBlink = 0;
-      }
-      // h = max(0.7, 1- delta)
-      v = max(brightness, 1 - delta);
-      s = min(1, delta);
-    }
+    // if(lastBlink != 0) {
+    //   delta =  min(now - lastBlink, 500) / 500.0;
+    //   if(delta == 1) {
+    //     lastBlink = 0;
+    //   }
+    //   // h = max(0.7, 1- delta)
+    //   v = max(brightness, 1-delta);
+    //   s = min(1, delta);
+    // }
   },
 ];
 
@@ -81,6 +74,7 @@ function effectSpin(index) {
   hsv(h, 1, v);
 }
 
+var accelerationToModeSwitch = 0.03;
 function checkModeSwitch(delta) {
   // 3D vector sum of x, y, and z acceleration
   horizontalAcceleration = sqrt(
@@ -114,29 +108,22 @@ function mapVAToZeroToOne(t) {
   return clamp(res, c, d);
 }
 
-function setSaturation() {
-  s = mapVAToZeroToOne(normalizedVA);
-}
-
 var weight = 0.1;
-function setBrightness() {
-  //brightness = mapVAToZeroToOne(normalizedVA);
+function updatePot() {
   newValue = analogInputs[4];
-  brightness = brightness * (1 - weight) + newValue * weight;
+  pot = pot * (1 - weight) + newValue * weight;
+}
+function setBrightness() {
+  brightness = pot;
 }
 
 function setHue() {
   h = 1 + va * 8;
 }
 
-function updatePot() {
-  newValue = analogInputs[4];
-  pot = pot * (1 - weight) + newValue * weight;
-}
-
-function updateButton() {
-  buttonValue = digitalRead(BUTTON_PIN);
-}
+// function updateButton() {
+//   buttonValue = digitalRead(BUTTON_PIN);
+// }
 
 function renderWing(index) {
   modes[mode](index);
@@ -163,16 +150,16 @@ function renderEye(index) {
 }
 
 function renderAntenna(index) {
-  if (buttonValue == 0.0) {
+  if (buttonValue == 1) {
     lastBlink = now;
   }
-  hh = 0.7;
+  hh = 0.2;
   vv = brightness;
   ss = 1;
 
   if (lastBlink != 0) {
     delta = min(now - lastBlink, 500) / 500.0;
-    if (delta == 1) {
+    if (delta >= 1) {
       lastBlink = 0;
     }
     hh = max(0.7, 1 - delta);
@@ -195,14 +182,15 @@ export function beforeRender(delta) {
   t1 = time(0.1);
   checkModeSwitch(delta);
   updateAccelerometer(delta);
+  updatePot();
   //setSaturation()
   setBrightness();
   setHue();
-  updatePot();
-  updateButton();
-  if (va > -0.015) {
-    buttonValue = 0;
-  }
+
+  // updateButton();
+  // if (va < -0.030) {
+  //   buttonValue = 1
+  // }
 }
 
 export function render(index) {
