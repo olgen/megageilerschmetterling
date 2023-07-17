@@ -44,9 +44,9 @@ modes = [
   },
 
   (index) => {
-    // if(buttonValue == 0.0) {
-    //   lastBlink = now;
-    // }
+    if (buttonValue == 0.0) {
+      lastBlink = now;
+    }
     // h = 0.7;
     v = brightness;
     s = 1;
@@ -141,9 +141,9 @@ function renderWing(index) {
 function renderEye(index) {
   pixelRange = lastEyesPixel - firstEyesPixel;
   pct = index / pixelRange; // Percent this pixel is into the eyes part of the strip
-  hh = pct * (5 * wave(t1 * 3) + 5) + 2 * wave(t1 * 2);
-  hh = (h % 0.5) + t1; // Remainder has precedence over addition
-  vv = triangle(5 * pct + 10 * t1);
+  hh = pct * (5 * wave(t1 * 0.001) + 5); //+ 2 * wave(t1*0.2)
+  hh = (hh % 0.5) + t1; // Remainder has precedence over addition
+  vv = triangle(5 * pct + 4 * t1);
   vv = vv * vv * vv;
   vv = max(brightness, vv);
   hsv(hh, 1, vv);
@@ -154,18 +154,22 @@ function renderAntenna(index) {
     lastBlink = now;
   }
   hh = 0.2;
-  vv = brightness;
+  vv = brightness / 10;
   ss = 1;
 
-  if (lastBlink != 0) {
-    delta = min(now - lastBlink, 500) / 500.0;
-    if (delta >= 1) {
-      lastBlink = 0;
-    }
-    hh = max(0.7, 1 - delta);
-    vv = max(brightness, 1 - delta);
-    ss = min(1, delta);
+  if (random(1) < 0.02) {
+    vv = max(brightness, 1);
+    ss = 0;
   }
+  // if(lastBlink != 0) {
+  //   delta =  min(now - lastBlink, 500) / 500.0;
+  //   if(delta >= 1) {
+  //     lastBlink = 0;
+  //   }
+  //   hh = max(0.7, 1- delta)
+  //   vv = max(brightness, 1-delta);
+  //   // ss = min(1, delta);
+  // }
 
   hsv(hh, ss, vv);
 
